@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://fararud-partners.onrender.com/api';
 
 function getToken() {
   return localStorage.getItem('partner_token');
@@ -53,4 +53,4 @@ export const api = {
   uploadRoomImage: (id, formData) => upload(`/rooms/${id}/upload`, formData),
 };
 
-export const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:4001';
+export const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://fararud-partners.onrender.com';
