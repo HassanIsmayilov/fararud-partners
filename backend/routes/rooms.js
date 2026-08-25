@@ -50,7 +50,7 @@ roomsRouter.post('/', authMiddleware, async (req, res) => {
     const {
       name, type, price_per_night, currency,
       capacity, bed_type, size_sqm, floor,
-      amenities, total_rooms, video_url
+      amenities, total_rooms, video_url, images
     } = req.body;
 
     if (!name || !price_per_night) {
@@ -59,8 +59,8 @@ roomsRouter.post('/', authMiddleware, async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO hotel_rooms 
-        (hotel_id, name, type, price_per_night, currency, capacity, bed_type, size_sqm, floor, amenities, total_rooms, video_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        (hotel_id, name, type, price_per_night, currency, capacity, bed_type, size_sqm, floor, amenities, total_rooms, video_url, images)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::jsonb)
        RETURNING *`,
       [
         req.hotel.id,
@@ -75,6 +75,7 @@ roomsRouter.post('/', authMiddleware, async (req, res) => {
         JSON.stringify(amenities || []),
         parseInt(total_rooms) || 1,
         video_url || null,
+        JSON.stringify(images || []),
       ]
     );
 
@@ -92,7 +93,7 @@ roomsRouter.put('/:id', authMiddleware, async (req, res) => {
     const {
       name, type, price_per_night, currency,
       capacity, bed_type, size_sqm, floor,
-      amenities, total_rooms, is_available, video_url
+      amenities, total_rooms, is_available, video_url, images
     } = req.body;
 
     // Check ownership
@@ -117,8 +118,9 @@ roomsRouter.put('/:id', authMiddleware, async (req, res) => {
         amenities       = COALESCE($9::jsonb, amenities),
         total_rooms     = COALESCE($10, total_rooms),
         is_available    = COALESCE($11, is_available),
-        video_url       = COALESCE($12, video_url)
-       WHERE id = $13 AND hotel_id = $14
+        video_url       = COALESCE($12, video_url),
+        images          = COALESCE($13::jsonb, images)
+       WHERE id = $14 AND hotel_id = $15
        RETURNING *`,
       [
         name || null, type || null,
@@ -132,6 +134,7 @@ roomsRouter.put('/:id', authMiddleware, async (req, res) => {
         total_rooms ? parseInt(total_rooms) : null,
         is_available !== undefined ? is_available : null,
         video_url !== undefined ? video_url : null,
+        images ? JSON.stringify(images) : null,
         id, req.hotel.id
       ]
     );
@@ -140,6 +143,21 @@ roomsRouter.put('/:id', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error('[Rooms PUT Error]', err.message);
     res.status(500).json({ error: 'Güncəlləmə xətası.' });
+  }
+});
+
+// ── POST /api/rooms/upload — Direct upload for room media (new or existing) ──
+roomsRouter.post('/upload', authMiddleware, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'Fayl göndərilməyib.' });
+
+    const fileUrl = `/uploads/rooms/${req.file.filename}`;
+    const isVideo = req.file.mimetype.startsWith('video/');
+
+    res.json({ success: true, url: fileUrl, type: isVideo ? 'video' : 'image' });
+  } catch (err) {
+    console.error('[Room Upload Error]', err.message);
+    res.status(500).json({ error: 'Fayl yükləmə xətası.' });
   }
 });
 

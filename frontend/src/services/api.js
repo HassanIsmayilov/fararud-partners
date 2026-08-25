@@ -51,6 +51,7 @@ export const api = {
   updateRoom: (id, data) => request('PUT', `/rooms/${id}`, data),
   deleteRoom: (id) => request('DELETE', `/rooms/${id}`),
   uploadRoomImage: (id, formData) => upload(`/rooms/${id}/upload`, formData),
+  uploadRoomDirect: (formData) => upload('/rooms/upload', formData),
   deleteRoomImage: (id, url) => request('DELETE', `/rooms/${id}/images`, { url }),
 
   // Bookings
