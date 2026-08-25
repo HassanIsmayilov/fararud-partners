@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import HotelProfile from './pages/HotelProfile';
 import Rooms from './pages/Rooms';
 import RoomForm from './pages/RoomForm';
+import Bookings from './pages/Bookings';
 
 function PrivateRoute({ children }) {
   const { hotel, loading } = useAuth();
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/bookings" element={<PrivateRoute><Bookings /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><HotelProfile /></PrivateRoute>} />
           <Route path="/rooms" element={<PrivateRoute><Rooms /></PrivateRoute>} />
           <Route path="/rooms/new" element={<PrivateRoute><RoomForm /></PrivateRoute>} />

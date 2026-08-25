@@ -51,6 +51,10 @@ export const api = {
   updateRoom: (id, data) => request('PUT', `/rooms/${id}`, data),
   deleteRoom: (id) => request('DELETE', `/rooms/${id}`),
   uploadRoomImage: (id, formData) => upload(`/rooms/${id}/upload`, formData),
+
+  // Bookings
+  getBookings: () => request('GET', '/bookings'),
+  updateBookingStatus: (id, status) => request('PATCH', `/bookings/${id}/status`, { status }),
 };
 
 export const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://fararud-partners.onrender.com';

@@ -2,7 +2,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const navItems = [
-  { to: '/dashboard', label: '📊 Göstərici', icon: '📊' },
+  { to: '/dashboard', label: '📊 Göstərici' },
+  { to: '/bookings', label: '📋 Rezervasiyalar' },
   { to: '/profile', label: '🏨 Otel Profili' },
   { to: '/rooms', label: '🛏️ Otaqlar' },
 ];

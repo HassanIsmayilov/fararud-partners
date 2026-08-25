@@ -102,3 +102,83 @@ publicRouter.get('/cities', async (req, res) => {
     res.status(500).json({ error: 'Xəta baş verdi.' });
   }
 });
+
+// ── POST /api/public/bookings — Customer submits new booking request ────────
+publicRouter.post('/bookings', async (req, res) => {
+  try {
+    const {
+      hotel_id,
+      room_id,
+      guest_name,
+      guest_email,
+      guest_phone,
+      check_in,
+      check_out,
+      adults = 1,
+      children = 0,
+      rooms_count = 1,
+      total_price,
+      currency = 'USD',
+      special_requests = ''
+    } = req.body;
+
+    if (!hotel_id || !guest_name || !guest_phone || !check_in || !check_out || !total_price) {
+      return res.status(400).json({ error: 'Bütün vacib xanaları doldurun.' });
+    }
+
+    // Generate unique booking code e.g. FR-748291
+    const booking_code = 'FR-' + Math.floor(100000 + Math.random() * 900000);
+
+    const result = await pool.query(
+      `INSERT INTO hotel_bookings (
+        booking_code, hotel_id, room_id, guest_name, guest_email, guest_phone,
+        check_in, check_out, adults, children, rooms_count, total_price,
+        currency, special_requests, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'pending')
+      RETURNING *`,
+      [
+        booking_code, hotel_id, room_id || null, guest_name, guest_email || '', guest_phone,
+        check_in, check_out, parseInt(adults), parseInt(children), parseInt(rooms_count),
+        parseFloat(total_price), currency, special_requests
+      ]
+    );
+
+    console.log(`🏨 [Yeni Rezervasiya Sorğusu] Kod: ${booking_code} | Qonaq: ${guest_name}`);
+    res.status(201).json({
+      success: true,
+      message: 'Rezervasiya sorğunuz qəbul edildi və otelə göndərildi.',
+      booking: result.rows[0]
+    });
+  } catch (err) {
+    console.error('[Public Booking Submit Error]', err.message);
+    res.status(500).json({ error: 'Rezervasiya zamanı xəta baş verdi.' });
+  }
+});
+
+// ── GET /api/public/bookings/:code — Customer checks booking status ─────────
+publicRouter.get('/bookings/:code', async (req, res) => {
+  try {
+    const { code } = req.params;
+    const result = await pool.query(
+      `SELECT 
+        b.id, b.booking_code, b.guest_name, b.check_in, b.check_out,
+        b.adults, b.children, b.total_price, b.currency, b.status, b.created_at,
+        h.name AS hotel_name, h.city AS hotel_city, h.phone AS hotel_phone,
+        r.name AS room_name
+       FROM hotel_bookings b
+       JOIN hotel_partners h ON h.id = b.hotel_id
+       LEFT JOIN hotel_rooms r ON r.id = b.room_id
+       WHERE b.booking_code = $1`,
+      [code.toUpperCase()]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Rezervasiya tapılmadı.' });
+    }
+
+    res.json({ success: true, booking: result.rows[0] });
+  } catch (err) {
+    console.error('[Public Booking Check Error]', err.message);
+    res.status(500).json({ error: 'Xəta baş verdi.' });
+  }
+});

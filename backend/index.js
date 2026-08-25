@@ -7,6 +7,7 @@ import { initDB } from './db/pool.js';
 import { authRouter } from './routes/auth.js';
 import { hotelsRouter } from './routes/hotels.js';
 import { roomsRouter } from './routes/rooms.js';
+import { bookingsRouter } from './routes/bookings.js';
 import { publicRouter } from './routes/public.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -43,6 +44,7 @@ app.use((req, _res, next) => {
 app.use('/api/auth', authRouter);
 app.use('/api/hotels', hotelsRouter);
 app.use('/api/rooms', roomsRouter);
+app.use('/api/bookings', bookingsRouter);
 app.use('/api/public', publicRouter);
 
 // ── Health Check ─────────────────────────────────────────────────────────────
