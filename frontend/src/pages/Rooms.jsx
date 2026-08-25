@@ -11,7 +11,7 @@ export default function Rooms() {
 
   const getImg = (url) => {
     if (!url) return '';
-    if (url.startsWith('http')) return url;
+    if (url.startsWith('http') || url.startsWith('data:')) return url;
     return `${BACKEND_URL}${url}`;
   };
 
