@@ -34,12 +34,12 @@ authRouter.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(12);
     const password_hash = await bcrypt.hash(password, salt);
 
-    // Insert new hotel partner
+    // Insert new hotel partner (auto-approved immediately)
     const result = await pool.query(
       `INSERT INTO hotel_partners 
-        (name, email, password_hash, phone, city, country, address, is_approved) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE)
-       RETURNING id, name, email, phone, city, country, is_approved, created_at`,
+        (name, email, password_hash, phone, city, country, address, is_approved, is_active) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE, TRUE)
+       RETURNING id, name, email, phone, city, country, is_approved, is_active, created_at`,
       [name, email.toLowerCase(), password_hash, phone || null, city || null, country || 'Iran', address || null]
     );
 

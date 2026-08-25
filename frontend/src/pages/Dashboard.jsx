@@ -28,20 +28,6 @@ export default function Dashboard() {
 
   return (
     <Layout title="İdarə Paneli">
-      {/* Approval warning */}
-      {!hotel?.is_approved && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 mb-6 flex items-start gap-4">
-          <span className="text-2xl">⏳</span>
-          <div>
-            <p className="font-semibold text-amber-400">Otelinizdən admin tərəfindən təsdiq gözlənilir</p>
-            <p className="text-slate-400 text-sm mt-1">
-              Oteli FARARUD saytında görünmək üçün admin tərəfindən aktivləşdirilməlidir.
-              Bu müddətdə profil məlumatlarınızı tamamlaya bilərsiniz.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map(stat => (

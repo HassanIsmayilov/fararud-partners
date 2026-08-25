@@ -42,16 +42,9 @@ export default function Sidebar() {
             <div className="text-xs text-slate-400 truncate">{hotel?.city || 'Şəhər'}</div>
           </div>
         </div>
-        {!hotel?.is_approved && (
-          <div className="mt-2 text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded px-2 py-1">
-            ⏳ Admin təsdiqi gözlənilir
-          </div>
-        )}
-        {hotel?.is_approved && (
-          <div className="mt-2 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded px-2 py-1">
-            ✅ Təsdiqlənib
-          </div>
-        )}
+        <div className="mt-2 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded px-2 py-1">
+          ✅ Aktiv Partnyor
+        </div>
       </div>
 
       {/* Navigation */}

@@ -18,7 +18,7 @@ publicRouter.get('/hotels', async (req, res) => {
         MAX(r.price_per_night) AS max_price
       FROM hotel_partners h
       LEFT JOIN hotel_rooms r ON r.hotel_id = h.id AND r.is_available = TRUE
-      WHERE h.is_approved = TRUE AND h.is_active = TRUE
+      WHERE (h.is_active = TRUE OR h.is_active IS NULL)
     `;
     const params = [];
     let paramIdx = 1;
@@ -57,7 +57,7 @@ publicRouter.get('/hotels/:id', async (req, res) => {
         id, name, city, country, address, description,
         stars, amenities, images, website, latitude, longitude, created_at
        FROM hotel_partners
-       WHERE id = $1 AND is_approved = TRUE AND is_active = TRUE`,
+       WHERE id = $1 AND (is_active = TRUE OR is_active IS NULL)`,
       [id]
     );
 
@@ -92,7 +92,7 @@ publicRouter.get('/cities', async (req, res) => {
     const result = await pool.query(
       `SELECT DISTINCT city, country, COUNT(*) as hotel_count
        FROM hotel_partners
-       WHERE is_approved = TRUE AND is_active = TRUE AND city IS NOT NULL
+       WHERE (is_active = TRUE OR is_active IS NULL) AND city IS NOT NULL
        GROUP BY city, country
        ORDER BY hotel_count DESC`
     );
