@@ -189,3 +189,28 @@ roomsRouter.post('/:id/upload', authMiddleware, upload.single('image'), async (r
     res.status(500).json({ error: 'Fayl yükləmə xətası.' });
   }
 });
+
+// ── DELETE /api/rooms/:id/images — Delete a room image ───────────────────────
+roomsRouter.delete('/:id/images', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: 'URL göndərilməyib.' });
+
+    await pool.query(
+      `UPDATE hotel_rooms
+       SET images = COALESCE((
+         SELECT jsonb_agg(elem)
+         FROM jsonb_array_elements(COALESCE(images, '[]'::jsonb)) elem
+         WHERE elem::text != $1 AND elem #>> '{}' != $2
+       ), '[]'::jsonb)
+       WHERE id = $3 AND hotel_id = $4`,
+      [JSON.stringify(url), url, id, req.hotel.id]
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[Delete Room Image Error]', err.message);
+    res.status(500).json({ error: 'Şəkil silmə xətası.' });
+  }
+});

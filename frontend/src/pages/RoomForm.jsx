@@ -124,6 +124,17 @@ export default function RoomForm() {
     }
   };
 
+  const handleDeleteImage = async (url) => {
+    if (!isEdit) return;
+    if (!confirm('Bu otaq şəklini silmək istəyirsiniz?')) return;
+    try {
+      await api.deleteRoomImage(id, url);
+      setImages(prev => prev.filter(img => img !== url));
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    }
+  };
+
   const inputClass = "w-full bg-white border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50";
   const labelClass = "block text-sm font-medium text-slate-600 mb-2";
 
@@ -220,8 +231,21 @@ export default function RoomForm() {
             <h2 className="font-semibold text-slate-800 mb-2">📸 Otaq Şəkilləri</h2>
             <div className="grid grid-cols-3 gap-3 mb-4">
               {images.map((img, i) => (
-                <div key={i} className="aspect-video bg-slate-100 rounded-xl overflow-hidden shadow-inner">
-                  <img src={getImg(img)} alt="" className="w-full h-full object-cover" />
+                <div key={i} className="relative group aspect-video bg-slate-100 rounded-xl overflow-hidden shadow-inner">
+                  <img
+                    src={getImg(img)}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteImage(img)}
+                    className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer shadow-md"
+                    title="Şəkli sil"
+                  >
+                    ✕
+                  </button>
                 </div>
               ))}
               <button
