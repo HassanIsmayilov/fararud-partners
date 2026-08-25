@@ -167,7 +167,7 @@ roomsRouter.post('/:id/upload', authMiddleware, upload.single('image'), async (r
     const imageUrl = `/uploads/rooms/${req.file.filename}`;
 
     await pool.query(
-      `UPDATE hotel_rooms SET images = images || $1::jsonb WHERE id = $2 AND hotel_id = $3`,
+      `UPDATE hotel_rooms SET images = COALESCE(images, '[]'::jsonb) || $1::jsonb WHERE id = $2 AND hotel_id = $3`,
       [JSON.stringify([imageUrl]), id, req.hotel.id]
     );
 

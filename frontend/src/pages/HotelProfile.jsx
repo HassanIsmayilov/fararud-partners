@@ -98,6 +98,12 @@ export default function HotelProfile() {
   const inputClass = "w-full bg-white border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50";
   const labelClass = "block text-sm font-medium text-slate-600 mb-2";
 
+  const getImg = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${BACKEND_URL}${url}`;
+  };
+
   return (
     <Layout title="🏨 Otel Profili">
       <form onSubmit={handleSave} className="space-y-6 max-w-3xl">
@@ -175,11 +181,11 @@ export default function HotelProfile() {
           <div className="grid grid-cols-3 gap-3 mb-4">
             {images.map((img, i) => (
               <div key={i} className="relative group aspect-video bg-slate-100 rounded-xl overflow-hidden">
-                <img src={`${BACKEND_URL}${img}`} alt="" className="w-full h-full object-cover" />
+                <img src={getImg(img)} alt="" className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => handleDeleteImage(img)}
-                  className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                  className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
                 >
                   ✕
                 </button>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../services/api';
+import { api, BACKEND_URL } from '../services/api';
 import Layout from '../components/Layout';
 
 export default function Rooms() {
@@ -8,6 +8,12 @@ export default function Rooms() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(null);
   const [message, setMessage] = useState(null);
+
+  const getImg = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${BACKEND_URL}${url}`;
+  };
 
   const fetchRooms = () => {
     setLoading(true);
@@ -84,7 +90,7 @@ export default function Rooms() {
               {/* Image or placeholder */}
               <div className="w-20 h-16 rounded-xl bg-slate-100 flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden">
                 {room.images?.length > 0
-                  ? <img src={room.images[0]} alt="" className="w-full h-full object-cover" />
+                  ? <img src={getImg(room.images[0])} alt="" className="w-full h-full object-cover" />
                   : '🛏️'
                 }
               </div>

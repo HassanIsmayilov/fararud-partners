@@ -111,6 +111,12 @@ export default function RoomForm() {
     </Layout>
   );
 
+  const getImg = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${BACKEND_URL}${url}`;
+  };
+
   return (
     <Layout title={isEdit ? '✏️ Otağı Düzənlə' : '➕ Yeni Otaq Əlavə Et'}>
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
@@ -193,7 +199,7 @@ export default function RoomForm() {
             <div className="grid grid-cols-3 gap-3 mb-4">
               {images.map((img, i) => (
                 <div key={i} className="aspect-video bg-slate-100 rounded-xl overflow-hidden">
-                  <img src={`${BACKEND_URL}${img}`} alt="" className="w-full h-full object-cover" />
+                  <img src={getImg(img)} alt="" className="w-full h-full object-cover" />
                 </div>
               ))}
               <button

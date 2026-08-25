@@ -105,7 +105,7 @@ hotelsRouter.post('/upload', authMiddleware, upload.single('image'), async (req,
     // Add image URL to hotel's images array
     await pool.query(
       `UPDATE hotel_partners 
-       SET images = images || $1::jsonb
+       SET images = COALESCE(images, '[]'::jsonb) || $1::jsonb
        WHERE id = $2`,
       [JSON.stringify([imageUrl]), req.hotel.id]
     );
@@ -125,13 +125,13 @@ hotelsRouter.delete('/images', authMiddleware, async (req, res) => {
 
     await pool.query(
       `UPDATE hotel_partners
-       SET images = (
+       SET images = COALESCE((
          SELECT jsonb_agg(elem)
-         FROM jsonb_array_elements(images) elem
-         WHERE elem::text != $1
-       )
-       WHERE id = $2`,
-      [JSON.stringify(url), req.hotel.id]
+         FROM jsonb_array_elements(COALESCE(images, '[]'::jsonb)) elem
+         WHERE elem::text != $1 AND elem #>> '{}' != $2
+       ), '[]'::jsonb)
+       WHERE id = $3`,
+      [JSON.stringify(url), url, req.hotel.id]
     );
 
     res.json({ success: true });
