@@ -49,7 +49,7 @@ roomsRouter.post('/', authMiddleware, async (req, res) => {
   try {
     const {
       name, type, price_per_night, currency,
-      capacity, bed_type, size_sqm, floor,
+      capacity, bed_type, bed_count, bathroom_count, room_count, size_sqm, floor,
       amenities, total_rooms, video_url, images
     } = req.body;
 
@@ -59,8 +59,8 @@ roomsRouter.post('/', authMiddleware, async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO hotel_rooms 
-        (hotel_id, name, type, price_per_night, currency, capacity, bed_type, size_sqm, floor, amenities, total_rooms, video_url, images)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::jsonb)
+        (hotel_id, name, type, price_per_night, currency, capacity, bed_type, bed_count, bathroom_count, room_count, size_sqm, floor, amenities, total_rooms, video_url, images)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16::jsonb)
        RETURNING *`,
       [
         req.hotel.id,
@@ -70,6 +70,9 @@ roomsRouter.post('/', authMiddleware, async (req, res) => {
         currency || 'USD',
         parseInt(capacity) || 2,
         bed_type || null,
+        parseInt(bed_count) || 1,
+        parseInt(bathroom_count) || 1,
+        parseInt(room_count) || 1,
         size_sqm ? parseInt(size_sqm) : null,
         floor ? parseInt(floor) : null,
         JSON.stringify(amenities || []),
@@ -92,7 +95,7 @@ roomsRouter.put('/:id', authMiddleware, async (req, res) => {
     const { id } = req.params;
     const {
       name, type, price_per_night, currency,
-      capacity, bed_type, size_sqm, floor,
+      capacity, bed_type, bed_count, bathroom_count, room_count, size_sqm, floor,
       amenities, total_rooms, is_available, video_url, images
     } = req.body;
 
@@ -113,14 +116,17 @@ roomsRouter.put('/:id', authMiddleware, async (req, res) => {
         currency        = COALESCE($4, currency),
         capacity        = COALESCE($5, capacity),
         bed_type        = COALESCE($6, bed_type),
-        size_sqm        = COALESCE($7, size_sqm),
-        floor           = COALESCE($8, floor),
-        amenities       = COALESCE($9::jsonb, amenities),
-        total_rooms     = COALESCE($10, total_rooms),
-        is_available    = COALESCE($11, is_available),
-        video_url       = COALESCE($12, video_url),
-        images          = COALESCE($13::jsonb, images)
-       WHERE id = $14 AND hotel_id = $15
+        bed_count       = COALESCE($7, bed_count),
+        bathroom_count  = COALESCE($8, bathroom_count),
+        room_count      = COALESCE($9, room_count),
+        size_sqm        = COALESCE($10, size_sqm),
+        floor           = COALESCE($11, floor),
+        amenities       = COALESCE($12::jsonb, amenities),
+        total_rooms     = COALESCE($13, total_rooms),
+        is_available    = COALESCE($14, is_available),
+        video_url       = COALESCE($15, video_url),
+        images          = COALESCE($16::jsonb, images)
+       WHERE id = $17 AND hotel_id = $18
        RETURNING *`,
       [
         name || null, type || null,
@@ -128,6 +134,9 @@ roomsRouter.put('/:id', authMiddleware, async (req, res) => {
         currency || null,
         capacity ? parseInt(capacity) : null,
         bed_type || null,
+        bed_count ? parseInt(bed_count) : null,
+        bathroom_count ? parseInt(bathroom_count) : null,
+        room_count ? parseInt(room_count) : null,
         size_sqm ? parseInt(size_sqm) : null,
         floor ? parseInt(floor) : null,
         amenities ? JSON.stringify(amenities) : null,

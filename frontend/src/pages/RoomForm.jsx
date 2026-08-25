@@ -21,7 +21,7 @@ export default function RoomForm() {
 
   const [form, setForm] = useState({
     name: '', type: 'standard', price_per_night: '', currency: 'USD',
-    capacity: 2, bed_type: '', size_sqm: '', floor: '',
+    capacity: 2, bed_type: '', bed_count: 1, bathroom_count: 1, room_count: 1, size_sqm: '', floor: '',
     amenities: [], total_rooms: 1, video_url: '',
   });
   const [images, setImages] = useState([]);
@@ -43,6 +43,9 @@ export default function RoomForm() {
             currency: room.currency || 'USD',
             capacity: room.capacity || 2,
             bed_type: room.bed_type || '',
+            bed_count: room.bed_count || 1,
+            bathroom_count: room.bathroom_count || 1,
+            room_count: room.room_count || 1,
             size_sqm: room.size_sqm || '',
             floor: room.floor || '',
             amenities: room.amenities || [],
@@ -76,6 +79,9 @@ export default function RoomForm() {
         ...form,
         price_per_night: parseFloat(form.price_per_night),
         capacity: parseInt(form.capacity) || 2,
+        bed_count: parseInt(form.bed_count) || 1,
+        bathroom_count: parseInt(form.bathroom_count) || 1,
+        room_count: parseInt(form.room_count) || 1,
         total_rooms: parseInt(form.total_rooms) || 1,
         size_sqm: form.size_sqm ? parseInt(form.size_sqm) : null,
         floor: form.floor ? parseInt(form.floor) : null,
@@ -201,7 +207,19 @@ export default function RoomForm() {
               <input type="number" min="1" max="20" value={form.capacity} onChange={set('capacity')} className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>Ümumi Otaq Sayı</label>
+              <label className={labelClass}>Çarpayı Sayı</label>
+              <input type="number" min="1" value={form.bed_count} onChange={set('bed_count')} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Hamam/Tualet Sayı</label>
+              <input type="number" min="1" value={form.bathroom_count} onChange={set('bathroom_count')} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Otaq Sayı (Daxili)</label>
+              <input type="number" min="1" value={form.room_count} onChange={set('room_count')} className={inputClass} title="Məsələn: 1 yataq, 1 qonaq otağı = 2" />
+            </div>
+            <div>
+              <label className={labelClass}>Ümumi Otaq Sayı (Oteldə)</label>
               <input type="number" min="1" value={form.total_rooms} onChange={set('total_rooms')} className={inputClass} />
             </div>
             <div>
