@@ -12,16 +12,10 @@ const __dirname = path.dirname(__filename);
 const uploadsDir = path.join(__dirname, '../uploads/hotels');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadsDir),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname) || '.jpg';
-    cb(null, `hotel-${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`);
-  },
-});
+const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit to prevent huge base64 strings
   fileFilter: (_req, file, cb) => {
     if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) cb(null, true);
     else cb(new Error('Yalnız şəkil və video faylları qəbul olunur!'));
@@ -102,7 +96,8 @@ hotelsRouter.post('/upload', authMiddleware, upload.single('image'), async (req,
       return res.status(400).json({ error: 'Fayl göndərilməyib.' });
     }
 
-    const fileUrl = `/uploads/hotels/${req.file.filename}`;
+    const base64Data = req.file.buffer.toString('base64');
+    const fileUrl = `data:${req.file.mimetype};base64,${base64Data}`;
     const isVideo = req.file.mimetype.startsWith('video/');
 
     if (isVideo) {
