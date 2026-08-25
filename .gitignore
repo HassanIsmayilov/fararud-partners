@@ -1,0 +1,10 @@
+# Root gitignore
+node_modules/
+dist/
+.env
+.env.local
+*.part
+*.exe
+*.log
+uploads/
+.DS_Store
