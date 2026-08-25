@@ -35,7 +35,7 @@ hotelsRouter.get('/me', authMiddleware, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT id, name, email, phone, city, country, address, description, 
-              stars, amenities, images, website, latitude, longitude,
+              stars, amenities, images, website, video_url, latitude, longitude,
               is_approved, is_active, created_at, updated_at
        FROM hotel_partners WHERE id = $1`,
       [req.hotel.id]
@@ -55,7 +55,7 @@ hotelsRouter.put('/me', authMiddleware, async (req, res) => {
   try {
     const {
       name, phone, city, country, address, description,
-      stars, amenities, website, latitude, longitude
+      stars, amenities, website, video_url, latitude, longitude
     } = req.body;
 
     const result = await pool.query(
@@ -69,11 +69,12 @@ hotelsRouter.put('/me', authMiddleware, async (req, res) => {
         stars       = COALESCE($7, stars),
         amenities   = COALESCE($8::jsonb, amenities),
         website     = COALESCE($9, website),
-        latitude    = COALESCE($10, latitude),
-        longitude   = COALESCE($11, longitude)
-       WHERE id = $12
+        video_url   = COALESCE($10, video_url),
+        latitude    = COALESCE($11, latitude),
+        longitude   = COALESCE($12, longitude)
+       WHERE id = $13
        RETURNING id, name, email, phone, city, country, address, description,
-                 stars, amenities, images, website, latitude, longitude,
+                 stars, amenities, images, website, video_url, latitude, longitude,
                  is_approved, is_active, updated_at`,
       [
         name || null, phone || null, city || null, country || null,
@@ -81,6 +82,7 @@ hotelsRouter.put('/me', authMiddleware, async (req, res) => {
         stars ? parseInt(stars) : null,
         amenities ? JSON.stringify(amenities) : null,
         website || null,
+        video_url !== undefined ? video_url : null,
         latitude || null, longitude || null,
         req.hotel.id
       ]
@@ -93,27 +95,36 @@ hotelsRouter.put('/me', authMiddleware, async (req, res) => {
   }
 });
 
-// ── POST /api/hotels/upload — Upload hotel image ─────────────────────────────
+// ── POST /api/hotels/upload — Upload hotel image or video ────────────────────
 hotelsRouter.post('/upload', authMiddleware, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'Şəkil göndərilməyib.' });
+      return res.status(400).json({ error: 'Fayl göndərilməyib.' });
     }
 
-    const imageUrl = `/uploads/hotels/${req.file.filename}`;
+    const fileUrl = `/uploads/hotels/${req.file.filename}`;
+    const isVideo = req.file.mimetype.startsWith('video/');
+
+    if (isVideo) {
+      await pool.query(
+        'UPDATE hotel_partners SET video_url = $1 WHERE id = $2',
+        [fileUrl, req.hotel.id]
+      );
+      return res.json({ success: true, url: fileUrl, type: 'video' });
+    }
 
     // Add image URL to hotel's images array
     await pool.query(
       `UPDATE hotel_partners 
        SET images = COALESCE(images, '[]'::jsonb) || $1::jsonb
        WHERE id = $2`,
-      [JSON.stringify([imageUrl]), req.hotel.id]
+      [JSON.stringify([fileUrl]), req.hotel.id]
     );
 
-    res.json({ success: true, url: imageUrl });
+    res.json({ success: true, url: fileUrl, type: 'image' });
   } catch (err) {
     console.error('[Upload Error]', err.message);
-    res.status(500).json({ error: 'Şəkil yükləmə xətası.' });
+    res.status(500).json({ error: 'Fayl yükləmə xətası.' });
   }
 });
 

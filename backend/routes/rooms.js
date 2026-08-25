@@ -50,7 +50,7 @@ roomsRouter.post('/', authMiddleware, async (req, res) => {
     const {
       name, type, price_per_night, currency,
       capacity, bed_type, size_sqm, floor,
-      amenities, total_rooms
+      amenities, total_rooms, video_url
     } = req.body;
 
     if (!name || !price_per_night) {
@@ -59,8 +59,8 @@ roomsRouter.post('/', authMiddleware, async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO hotel_rooms 
-        (hotel_id, name, type, price_per_night, currency, capacity, bed_type, size_sqm, floor, amenities, total_rooms)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        (hotel_id, name, type, price_per_night, currency, capacity, bed_type, size_sqm, floor, amenities, total_rooms, video_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
        RETURNING *`,
       [
         req.hotel.id,
@@ -74,6 +74,7 @@ roomsRouter.post('/', authMiddleware, async (req, res) => {
         floor ? parseInt(floor) : null,
         JSON.stringify(amenities || []),
         parseInt(total_rooms) || 1,
+        video_url || null,
       ]
     );
 
@@ -91,7 +92,7 @@ roomsRouter.put('/:id', authMiddleware, async (req, res) => {
     const {
       name, type, price_per_night, currency,
       capacity, bed_type, size_sqm, floor,
-      amenities, total_rooms, is_available
+      amenities, total_rooms, is_available, video_url
     } = req.body;
 
     // Check ownership
@@ -115,8 +116,9 @@ roomsRouter.put('/:id', authMiddleware, async (req, res) => {
         floor           = COALESCE($8, floor),
         amenities       = COALESCE($9::jsonb, amenities),
         total_rooms     = COALESCE($10, total_rooms),
-        is_available    = COALESCE($11, is_available)
-       WHERE id = $12 AND hotel_id = $13
+        is_available    = COALESCE($11, is_available),
+        video_url       = COALESCE($12, video_url)
+       WHERE id = $13 AND hotel_id = $14
        RETURNING *`,
       [
         name || null, type || null,
@@ -129,6 +131,7 @@ roomsRouter.put('/:id', authMiddleware, async (req, res) => {
         amenities ? JSON.stringify(amenities) : null,
         total_rooms ? parseInt(total_rooms) : null,
         is_available !== undefined ? is_available : null,
+        video_url !== undefined ? video_url : null,
         id, req.hotel.id
       ]
     );
@@ -158,22 +161,31 @@ roomsRouter.delete('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// ── POST /api/rooms/:id/upload — Upload room image ───────────────────────────
+// ── POST /api/rooms/:id/upload — Upload room image or video ──────────────────
 roomsRouter.post('/:id/upload', authMiddleware, upload.single('image'), async (req, res) => {
   try {
     const { id } = req.params;
-    if (!req.file) return res.status(400).json({ error: 'Şəkil göndərilməyib.' });
+    if (!req.file) return res.status(400).json({ error: 'Fayl göndərilməyib.' });
 
-    const imageUrl = `/uploads/rooms/${req.file.filename}`;
+    const fileUrl = `/uploads/rooms/${req.file.filename}`;
+    const isVideo = req.file.mimetype.startsWith('video/');
+
+    if (isVideo) {
+      await pool.query(
+        'UPDATE hotel_rooms SET video_url = $1 WHERE id = $2 AND hotel_id = $3',
+        [fileUrl, id, req.hotel.id]
+      );
+      return res.json({ success: true, url: fileUrl, type: 'video' });
+    }
 
     await pool.query(
       `UPDATE hotel_rooms SET images = COALESCE(images, '[]'::jsonb) || $1::jsonb WHERE id = $2 AND hotel_id = $3`,
-      [JSON.stringify([imageUrl]), id, req.hotel.id]
+      [JSON.stringify([fileUrl]), id, req.hotel.id]
     );
 
-    res.json({ success: true, url: imageUrl });
+    res.json({ success: true, url: fileUrl, type: 'image' });
   } catch (err) {
     console.error('[Room Upload Error]', err.message);
-    res.status(500).json({ error: 'Şəkil yükləmə xətası.' });
+    res.status(500).json({ error: 'Fayl yükləmə xətası.' });
   }
 });

@@ -21,13 +21,15 @@ export default function RoomForm() {
   const [form, setForm] = useState({
     name: '', type: 'standard', price_per_night: '', currency: 'USD',
     capacity: 2, bed_type: '', size_sqm: '', floor: '',
-    amenities: [], total_rooms: 1,
+    amenities: [], total_rooms: 1, video_url: '',
   });
   const [images, setImages] = useState([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(isEdit);
+  const videoFileRef = useRef();
 
   useEffect(() => {
     if (isEdit) {
@@ -45,6 +47,7 @@ export default function RoomForm() {
             floor: room.floor || '',
             amenities: room.amenities || [],
             total_rooms: room.total_rooms || 1,
+            video_url: room.video_url || '',
           });
           setImages(room.images || []);
         }
@@ -99,6 +102,25 @@ export default function RoomForm() {
       setMessage({ type: 'error', text: err.message });
     } finally {
       setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const handleVideoUpload = async (e) => {
+    if (!isEdit) return;
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingVideo(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await api.uploadRoomImage(id, formData);
+      setForm(prev => ({ ...prev, video_url: res.url }));
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setUploadingVideo(false);
+      if (videoFileRef.current) videoFileRef.current.value = '';
     }
   };
 
@@ -195,10 +217,10 @@ export default function RoomForm() {
         {/* Images (only in edit mode) */}
         {isEdit && (
           <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-            <h2 className="font-semibold text-slate-800 mb-5">Otaq Şəkilləri</h2>
+            <h2 className="font-semibold text-slate-800 mb-2">📸 Otaq Şəkilləri</h2>
             <div className="grid grid-cols-3 gap-3 mb-4">
               {images.map((img, i) => (
-                <div key={i} className="aspect-video bg-slate-100 rounded-xl overflow-hidden">
+                <div key={i} className="aspect-video bg-slate-100 rounded-xl overflow-hidden shadow-inner">
                   <img src={getImg(img)} alt="" className="w-full h-full object-cover" />
                 </div>
               ))}
@@ -206,15 +228,85 @@ export default function RoomForm() {
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 disabled={uploading}
-                className="aspect-video border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center text-slate-400 hover:border-amber-400 hover:text-amber-500 transition-colors text-sm"
+                className="aspect-video border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center text-slate-400 hover:border-amber-400 hover:text-amber-500 transition-colors text-sm cursor-pointer"
               >
-                {uploading ? '⏳' : '+ Şəkil əlavə et'}
+                {uploading ? '⏳ Yüklənir...' : '+ Şəkil əlavə et'}
               </button>
             </div>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-            {!isEdit && <p className="text-xs text-slate-400">Şəkil əlavə etmək üçün əvvəlcə otağı yaradın.</p>}
           </div>
         )}
+
+        {/* Video Section */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+          <h2 className="font-semibold text-slate-800 mb-2">🎥 Otaq Videosu</h2>
+          <p className="text-xs text-slate-400 mb-4">Otağın video icmalını əlavə edin</p>
+          
+          <div className="space-y-4">
+            <div>
+              <label className={labelClass}>Video Linki (YouTube və ya MP4 Link)</label>
+              <input
+                value={form.video_url || ''}
+                onChange={set('video_url')}
+                placeholder="https://youtube.com/watch?v=... və ya https://site.com/video.mp4"
+                className={inputClass}
+              />
+            </div>
+
+            {isEdit && (
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-slate-400">və ya fayl yükləyin:</span>
+                <button
+                  type="button"
+                  onClick={() => videoFileRef.current?.click()}
+                  disabled={uploadingVideo}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+                >
+                  {uploadingVideo ? '⏳ Video yüklənir...' : '📁 Video Faylı Seç (.mp4, .webm)'}
+                </button>
+                <input
+                  ref={videoFileRef}
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={handleVideoUpload}
+                />
+              </div>
+            )}
+
+            {/* Video Preview */}
+            {form.video_url && (
+              <div className="mt-4 p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-slate-700">Video Baxış:</span>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, video_url: '' })}
+                    className="text-xs text-red-500 hover:underline cursor-pointer"
+                  >
+                    Videonu Sil
+                  </button>
+                </div>
+                <div className="aspect-video rounded-xl overflow-hidden bg-black max-w-md mx-auto">
+                  {form.video_url.includes('youtube.com') || form.video_url.includes('youtu.be') ? (
+                    <iframe
+                      src={form.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                      title="Room video"
+                      className="w-full h-full"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video
+                      src={getImg(form.video_url)}
+                      controls
+                      className="w-full h-full object-contain"
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
         {message && (
           <div className={`rounded-xl px-4 py-3 text-sm ${

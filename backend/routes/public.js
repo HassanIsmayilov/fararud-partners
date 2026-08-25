@@ -11,7 +11,7 @@ publicRouter.get('/hotels', async (req, res) => {
     let query = `
       SELECT 
         h.id, h.name, h.city, h.country, h.address, h.description,
-        h.stars, h.amenities, h.images, h.website, h.latitude, h.longitude,
+        h.stars, h.amenities, h.images, h.website, h.video_url, h.latitude, h.longitude,
         h.created_at,
         COUNT(r.id) AS room_count,
         MIN(r.price_per_night) AS min_price,
@@ -55,7 +55,7 @@ publicRouter.get('/hotels/:id', async (req, res) => {
     const hotelResult = await pool.query(
       `SELECT 
         id, name, city, country, address, description,
-        stars, amenities, images, website, latitude, longitude, created_at
+        stars, amenities, images, website, video_url, latitude, longitude, created_at
        FROM hotel_partners
        WHERE id = $1 AND (is_active = TRUE OR is_active IS NULL)`,
       [id]
@@ -68,7 +68,7 @@ publicRouter.get('/hotels/:id', async (req, res) => {
     const roomsResult = await pool.query(
       `SELECT 
         id, name, type, price_per_night, currency, capacity,
-        bed_type, size_sqm, floor, amenities, images, total_rooms, is_available
+        bed_type, size_sqm, floor, amenities, images, video_url, total_rooms, is_available
        FROM hotel_rooms
        WHERE hotel_id = $1 AND is_available = TRUE
        ORDER BY price_per_night ASC`,
