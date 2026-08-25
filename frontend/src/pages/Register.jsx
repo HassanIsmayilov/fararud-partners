@@ -52,7 +52,7 @@ export default function Register() {
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center text-slate-900 font-bold text-3xl mx-auto mb-4">F</div>
           <h1 className="text-2xl font-bold text-white">Otel Qeydiyyatı</h1>
-          <p className="text-slate-400 mt-1 text-sm">Ferarun Partner Portalına qoşulun</p>
+          <p className="text-slate-400 mt-1 text-sm">FARARUD Partner Portalına qoşulun</p>
         </div>
 
         <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl">

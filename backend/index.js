@@ -22,7 +22,7 @@ await initDB().catch(err => console.error('[DB Init]', err.message));
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',')
-    : ['http://localhost:5174', 'http://localhost:5173', 'https://ferarun.vercel.app'],
+    : ['http://localhost:5174', 'http://localhost:5173', 'https://fararud.vercel.app', 'https://fararud-partners.vercel.app'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -51,7 +51,7 @@ app.use('/api/public', publicRouter);
 app.get('/', (_req, res) => {
   res.json({
     status: 'ok',
-    service: 'Ferarun Hotel Partner Portal API',
+    service: 'FARARUD Hotel Partner Portal API',
     version: '1.0.0',
     endpoints: [
       'POST /api/auth/register',
@@ -80,7 +80,7 @@ app.use((err, _req, res, _next) => {
 
 // ── Start Server ─────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`\n🏨 Ferarun Hotel Partner Portal API — http://localhost:${PORT}`);
+  console.log(`\n🏨 FARARUD Hotel Partner Portal API — http://localhost:${PORT}`);
   console.log(`   🔐 Auth:   POST /api/auth/register | /api/auth/login`);
   console.log(`   🏨 Hotels: GET/PUT /api/hotels/me`);
   console.log(`   🛏️  Rooms:  GET/POST/PUT/DELETE /api/rooms`);

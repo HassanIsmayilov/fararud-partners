@@ -35,7 +35,7 @@ export default function Dashboard() {
           <div>
             <p className="font-semibold text-amber-400">Otelinizdən admin tərəfindən təsdiq gözlənilir</p>
             <p className="text-slate-400 text-sm mt-1">
-              Oteli Ferarun Travel saytında görünmək üçün admin tərəfindən aktivləşdirilməlidir.
+              Oteli FARARUD saytında görünmək üçün admin tərəfindən aktivləşdirilməlidir.
               Bu müddətdə profil məlumatlarınızı tamamlaya bilərsiniz.
             </p>
           </div>

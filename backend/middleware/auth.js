@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'ferarun-partners-secret-2025';
+const JWT_SECRET = process.env.JWT_SECRET || 'fararud-partners-secret-2025';
 
 export function authMiddleware(req, res, next) {
   const authHeader = req.headers['authorization'];

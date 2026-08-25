@@ -25,7 +25,7 @@ export default function Sidebar() {
             F
           </div>
           <div>
-            <div className="font-bold text-sm text-white">Ferarun</div>
+            <div className="font-bold text-sm text-white">FARARUD</div>
             <div className="text-xs text-amber-400">Partner Portal</div>
           </div>
         </div>

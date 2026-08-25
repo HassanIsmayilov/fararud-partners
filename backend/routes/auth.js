@@ -5,7 +5,7 @@ import pool from '../db/pool.js';
 
 export const authRouter = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'ferarun-partners-secret-2025';
+const JWT_SECRET = process.env.JWT_SECRET || 'fararud-partners-secret-2025';
 const JWT_EXPIRES = '7d';
 
 // ── POST /api/auth/register ──────────────────────────────────────────────────
